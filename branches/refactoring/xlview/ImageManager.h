@@ -1,0 +1,79 @@
+#ifndef XL_VIEW_IMAGE_MANAGER_H
+#define XL_VIEW_IMAGE_MANAGER_H
+#include <vector>
+#include <atltypes.h>
+#include "libxl/include/common.h"
+#include "libxl/include/string.h"
+#include "libxl/include/utilities.h"
+#include "libxl/include/dp/Observable.h"
+#include "DisplayImage.h"
+#include "ImageLoader.h"
+
+
+class CImageManager 
+	: public xl::dp::CObserableT<CImageManager>
+	, public IImageLoaderCancel
+	, public xl::CUserLock
+{
+protected:
+	enum DIRECTION {
+		FORWARD,
+		BACKWARD
+	};
+	typedef std::vector<xl::uint>                  _Indexes;
+	typedef std::vector<CDisplayImagePtr>          _Images;
+	typedef _Images::iterator                      _ImageIter;
+	xl::tstring        m_directory; // include the last '\\'
+	_Images            m_images;
+	xl::uint           m_currIndex;
+	DIRECTION          m_direction;
+
+	CRect              m_rcView;
+
+	void _AddFile (const xl::tstring &file);
+
+	// threads
+	bool                                           m_exit;
+	bool                                           m_indexChanged;
+	bool                                           m_sizeChanged;
+	HANDLE                                         m_semaphoreWorking;
+	HANDLE                                         m_threadWorking;
+	static unsigned int __stdcall _WorkingThread (void *);
+	static void _GetPrefetchIndexes (_Indexes &indexes, int currIndex, int count, DIRECTION direction, int range);
+
+	void _CreateThreads ();
+	void _TerminateThreads ();
+
+	void _BeginPrefetch ();
+
+
+public:
+	// event
+	enum EVENT 
+		: xl::dp::CObserableT<CImageManager>::EVT
+	{
+		EVT_READY,                             // param (pointer for total count)
+		EVT_INDEX_CHANGED,                     // param (pointer for the current index)
+		EVT_NUM
+	};
+
+	CImageManager ();
+	virtual ~CImageManager ();
+
+	int getCurrIndex () const;
+	int getImageCount () const;
+
+	void setFile (const xl::tstring &file);
+	void setIndex (int index);
+
+	CDisplayImagePtr getImage (int index);
+
+	//////////////////////////////////////////////////////////////////////////
+	// To be notified
+	void onViewSizeChanged (CRect rc); // called by the view to notify its size changed
+
+	// IImageLoaderCancel
+	virtual bool shouldCancel ();
+};
+
+#endif
