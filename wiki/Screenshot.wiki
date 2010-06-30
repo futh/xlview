@@ -1,0 +1,15 @@
+#Screenshot
+
+= Screenshot =
+
+Navigating
+[http://xlview.googlecode.com/svn/trunk/screenshot/xlview-navigating-tn.jpg]
+
+Gesture
+[http://xlview.googlecode.com/svn/trunk/screenshot/xlview-gesture-tn.jpg]
+
+Show
+[http://xlview.googlecode.com/svn/trunk/screenshot/xlview-show-tn.jpg]
+
+Setting
+[http://xlview.googlecode.com/svn/trunk/screenshot/xlview-setting-tn.jpg]
